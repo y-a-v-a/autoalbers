@@ -3,78 +3,101 @@
 <head>
     <title>AutoAlbers</title>
     <style>
-        body {
+        html, body {
             padding: 0;
             margin: 0;
         }
         canvas {
-            margin: 20px;
-            border: 1px solid #ddd;
-            background: transparent url(albers.jpg) 0 0 no-repeat;
+            display: block;
+            margin: 60px auto 0;
+            border: 1px solid #dfdfdf;
         }
         #meter {
             position: fixed;
-            width: 100%;
             bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
             line-height: 0;
-            height: 3px;
         }
         #amount {
             position: relative;
-            height: 3px;
-            line-height: 0;
-            width: 0;
             left: 0;
             top: 0;
-            background: #f00;
+            width: 0;
+            height: 4px;
+            line-height: 0;
+            background: #bbb;
         }
     </style>
 </head>
 <body>
-    <canvas id="autoalbers" width="400" height="400"></canvas>
+    <canvas id="autoalbers" width="600" height="600"></canvas>
     <div id="meter"><div id="amount"></div></div>
     <script src="color-scheme.js"></script>
     <script>
+    (function() {
         var interval
-        , duration = 20
+        , duration = 12
+        , scale = 1.5
+        , canvas = document.getElementById('autoalbers')
+        , context = canvas.getContext('2d')
 
         , createAlbers = function createAlbers() {
-            var a = document.getElementById('autoalbers')
-            , context = a.getContext('2d')
-            , colorScheme = new ColorScheme()
+            var keyCache = []
             , colors = []
-            , hue = Math.floor(Math.random() * 360)
-            , keyCache = []
             , getKey = function getKey() {
-                var key = Math.floor(Math.random() * colors.length);
+                var key = getRandomKey(colors.length);
                 while (keyCache.indexOf(key) !== -1) {
-                    key = Math.floor(Math.random() * colors.length);
+                    key = getRandomKey(colors.length);
                 }
                 keyCache.push(key);
                 return key;
             }
-            , i = 0
-            , schemes = ['mono', 'contrast', 'triade', 'tetrade', 'analogic']
-            , variations = ['pastel', 'soft', 'light', 'hard', 'pale']
-            , variation = variations[Math.floor(Math.random() * variations.length)]
-            , scheme = schemes[Math.floor(Math.random() * schemes.length)];
+            , i = 0;
 
-            console.log(hue, variation, scheme);
-
-            colorScheme.from_hue(hue).scheme('triade').variation(variation);
-            colors = colorScheme.colors();
+            colors = generateScheme();
             
             for(;i < 4; i +=1) {
                 (function(i) {
                     var key = getKey()
-                    , x = i * 40
-                    , y = i * 60
-                    , width = 400 - (i * 80)
-                    , height = 400 - (i * 80);
+                    , x = i * 40 * scale
+                    , y = i * 60 * scale
+                    , width = (400 * scale) - (i * 80 * scale)
+                    , height = (400* scale) - (i * 80 * scale);
                     context.fillStyle = colors[key];
                     context.fillRect(x, y, width, height);
                 }(i));
             }
+        }
+        
+        , generateScheme = function generateScheme() {
+            var colorScheme = new ColorScheme()
+            , hue = Math.floor(Math.random() * 360)
+            , schemes = ['mono', 'contrast', 'triade', 'tetrade', 'analogic']
+            , variations = ['pastel', 'soft', 'light', 'hard', 'pale']
+            , variation = variations[getRandomKey(variations.length)]
+            , scheme = schemes[getRandomKey(schemes.length)]
+            , distance
+            , complement;
+            
+            colorScheme.from_hue(hue).scheme(scheme).variation(variation);
+            if (scheme === 'analogic') {
+                complement = !!Math.round(Math.random());
+                colorScheme.add_complement(complement);
+            }
+            if (['mono', 'contrast'].indexOf(scheme) == -1) {
+                distance = Math.random();
+                colorScheme.distance(distance);
+            }
+
+//            console.log(hue, scheme, variation, complement, distance);
+            
+            return colorScheme.colors();
+        }
+        
+        , getRandomKey = function getRandomKey(max) {
+            return Math.floor(Math.random() * max);
         }
 
         , animate = function animate(seconds) {
@@ -95,7 +118,7 @@
 
         timer();
         setInterval(timer, duration * 1e+3);
-        
+    }());
     </script>
 </body>
 </html>
