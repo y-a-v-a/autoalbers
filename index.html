@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AutoAlbers</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        canvas {
+            margin: 20px;
+            border: 1px solid #ddd;
+            background: transparent url(albers.jpg) 0 0 no-repeat;
+        }
+        #meter {
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+            line-height: 0;
+            height: 3px;
+        }
+        #amount {
+            position: relative;
+            height: 3px;
+            line-height: 0;
+            width: 0;
+            left: 0;
+            top: 0;
+            background: #f00;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="autoalbers" width="400" height="400"></canvas>
+    <div id="meter"><div id="amount"></div></div>
+    <script src="color-scheme.js"></script>
+    <script>
+        var interval
+        , duration = 20
+
+        , createAlbers = function createAlbers() {
+            var a = document.getElementById('autoalbers')
+            , context = a.getContext('2d')
+            , colorScheme = new ColorScheme()
+            , colors = []
+            , hue = Math.floor(Math.random() * 360)
+            , keyCache = []
+            , getKey = function getKey() {
+                var key = Math.floor(Math.random() * colors.length);
+                while (keyCache.indexOf(key) !== -1) {
+                    key = Math.floor(Math.random() * colors.length);
+                }
+                keyCache.push(key);
+                return key;
+            }
+            , i = 0
+            , schemes = ['mono', 'contrast', 'triade', 'tetrade', 'analogic']
+            , variations = ['pastel', 'soft', 'light', 'hard', 'pale']
+            , variation = variations[Math.floor(Math.random() * variations.length)]
+            , scheme = schemes[Math.floor(Math.random() * schemes.length)];
+
+            console.log(hue, variation, scheme);
+
+            colorScheme.from_hue(hue).scheme('triade').variation(variation);
+            colors = colorScheme.colors();
+            
+            for(;i < 4; i +=1) {
+                (function(i) {
+                    var key = getKey()
+                    , x = i * 40
+                    , y = i * 60
+                    , width = 400 - (i * 80)
+                    , height = 400 - (i * 80);
+                    context.fillStyle = colors[key];
+                    context.fillRect(x, y, width, height);
+                }(i));
+            }
+        }
+
+        , animate = function animate(seconds) {
+            var element = document.getElementById('amount')
+            , idx = 0
+            , step = (100 / (seconds * 60));
+            interval = setInterval(function() {
+                element.style.width = (idx * step) + '%';
+                idx += 1;
+            }, (1e+3 / 60));
+        }
+        
+        , timer = function timer() {
+            createAlbers();
+            clearInterval(interval);
+            animate(duration);
+        };
+
+        timer();
+        setInterval(timer, duration * 1e+3);
+        
+    </script>
+</body>
+</html>
