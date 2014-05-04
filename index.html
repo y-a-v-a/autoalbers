@@ -19,6 +19,7 @@
             width: 100%;
             height: 4px;
             line-height: 0;
+            overflow: hidden;
         }
         #amount {
             position: relative;
@@ -36,6 +37,33 @@
     <div id="meter"><div id="amount"></div></div>
     <script src="color-scheme.js"></script>
     <script>
+    'use strict';
+    if (!Date.now)
+        Date.now = function() { return new Date().getTime(); };
+
+    (function() {
+        var vendors = ['webkit', 'moz'];
+        for (var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i) {
+            var vp = vendors[i];
+            window.requestAnimationFrame = window[vp+'RequestAnimationFrame'];
+            window.cancelAnimationFrame = (window[vp+'CancelAnimationFrame']
+                                       || window[vp+'CancelRequestAnimationFrame']);
+        }
+        if (/iP(ad|hone|od).*OS 6/.test(window.navigator.userAgent) // iOS6 is buggy
+            || !window.requestAnimationFrame || !window.cancelAnimationFrame) {
+            var lastTime = 0;
+            window.requestAnimationFrame = function(callback) {
+                var now = Date.now();
+                var nextTime = Math.max(lastTime + 16, now);
+                return setTimeout(function() { callback(lastTime = nextTime); },
+                                  nextTime - now);
+            };
+            window.cancelAnimationFrame = clearTimeout;
+        }
+    }());
+    
+    var handle;
+
     (function() {
         var interval
         , duration = 12
@@ -58,7 +86,7 @@
 
             colors = generateScheme();
             
-            for(;i < 4; i +=1) {
+            for(;i < 4; i += 1) {
                 (function(i) {
                     var key = getKey()
                     , x = i * 40 * scale
@@ -100,25 +128,33 @@
             return Math.floor(Math.random() * max);
         }
 
-        , animate = function animate(seconds) {
-            var element = document.getElementById('amount')
-            , idx = 0
-            , step = (100 / (seconds * 60));
-            interval = setInterval(function() {
-                element.style.width = (idx * step) + '%';
-                idx += 1;
-            }, (1e+3 / 60));
+        , draw
+        , element = document.getElementById('amount')
+        , size = 0
+        , step = (document.documentElement.clientWidth / duration)
+        , was = 0
+        , draw = function(time) {
+            var delta = (time || 0) - was
+            , jump = delta === 0 ? 0 : (step * (delta / 1000));
+            handle = requestAnimationFrame(draw);
+            element.style.width = (size += jump) + 'px';
+            was = time || 0;
         }
-        
         , timer = function timer() {
+            cancelAnimationFrame(handle);
+            size = 0;
             createAlbers();
-            clearInterval(interval);
-            animate(duration);
+            draw();
         };
 
         timer();
-        setInterval(timer, duration * 1e+3);
+       interval = setInterval(timer, duration * 1000);
     }());
+    
+    function kill() {
+        cancelAnimationFrame(handle);
+    }
+    
     </script>
 </body>
 </html>
