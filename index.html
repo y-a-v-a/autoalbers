@@ -38,25 +38,27 @@
     <script src="color-scheme.js"></script>
     <script>
     'use strict';
+    // polyfill
     if (!Date.now)
         Date.now = function() { return new Date().getTime(); };
 
     (function() {
-        var vendors = ['webkit', 'moz'];
-        for (var i = 0; i < vendors.length && !window.requestAnimationFrame; ++i) {
-            var vp = vendors[i];
-            window.requestAnimationFrame = window[vp+'RequestAnimationFrame'];
-            window.cancelAnimationFrame = (window[vp+'CancelAnimationFrame']
-                                       || window[vp+'CancelRequestAnimationFrame']);
+        var vendors = ['webkit', 'moz']
+        , i = 0
+        , prefix,
+        lastTime;
+        for (; i < vendors.length && !window.requestAnimationFrame; ++i) {
+            prefix = vendors[i];
+            window.requestAnimationFrame = window[prefix + 'RequestAnimationFrame'];
+            window.cancelAnimationFrame = (window[prefix + 'CancelAnimationFrame'] || window[prefix + 'CancelRequestAnimationFrame']);
         }
         if (/iP(ad|hone|od).*OS 6/.test(window.navigator.userAgent) // iOS6 is buggy
             || !window.requestAnimationFrame || !window.cancelAnimationFrame) {
-            var lastTime = 0;
+            lastTime = 0;
             window.requestAnimationFrame = function(callback) {
-                var now = Date.now();
-                var nextTime = Math.max(lastTime + 16, now);
-                return setTimeout(function() { callback(lastTime = nextTime); },
-                                  nextTime - now);
+                var now = Date.now(),
+                nextTime = Math.max(lastTime + 16, now);
+                return setTimeout(function() { callback(lastTime = nextTime); }, nextTime - now);
             };
             window.cancelAnimationFrame = clearTimeout;
         }
@@ -66,8 +68,7 @@
 
     (function() {
         var interval
-        , duration = 12
-        , scale = 1.5
+        , duration = 8
         , canvas = document.getElementById('autoalbers')
         , context = canvas.getContext('2d')
 
@@ -89,11 +90,12 @@
             for(;i < 4; i += 1) {
                 (function(i) {
                     var key = getKey()
-                    , x = i * 40 * scale
-                    , y = i * 60 * scale
-                    , width = (400 * scale) - (i * 80 * scale)
-                    , height = (400* scale) - (i * 80 * scale);
-                    context.fillStyle = colors[key];
+                    , x = i * 60
+                    , y = i * 90
+                    , width = (600) - (i * 120)
+                    , height = (600) - (i * 120);
+
+                    context.fillStyle = '#' + colors[key];
                     context.fillRect(x, y, width, height);
                 }(i));
             }
@@ -119,8 +121,8 @@
                 colorScheme.distance(distance);
             }
 
-//            console.log(hue, scheme, variation, complement, distance);
-            
+            window.console && console.log && console.log(hue, scheme, variation, complement, distance);
+
             return colorScheme.colors();
         }
         
@@ -128,27 +130,26 @@
             return Math.floor(Math.random() * max);
         }
 
-        , draw
-        , element = document.getElementById('amount')
-        , size = 0
+        , amount = document.getElementById('amount')
+        , width = 0
         , step = (document.documentElement.clientWidth / duration)
-        , was = 0
+        , past = 0
         , draw = function(time) {
-            var delta = (time || 0) - was
-            , jump = delta === 0 ? 0 : (step * (delta / 1000));
+            var delta = (time || 0) - past
+            , jump = (delta === 0) ? 0 : (step * (delta / 1000));
             handle = requestAnimationFrame(draw);
-            element.style.width = (size += jump) + 'px';
-            was = time || 0;
+            amount.style.width = (width += jump) + 'px';
+            past = time || 0;
         }
         , timer = function timer() {
             cancelAnimationFrame(handle);
-            size = 0;
+            width = 0;
             createAlbers();
             draw();
         };
 
         timer();
-       interval = setInterval(timer, duration * 1000);
+        interval = setInterval(timer, duration * 1000);
     }());
     
     function kill() {
