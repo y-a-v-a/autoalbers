@@ -5,5 +5,7 @@ Create a new 'Hommage to the Square' (originally a series by German/American Jos
 
 Color scheme JavaScript taken from [https://github.com/c0bra/color-scheme-js](https://github.com/c0bra/color-scheme-js)
 
+![](https://raw.githubusercontent.com/y-a-v-a/autoalbers/master/albers.jpg)
+
 (c) 2014 - Yet Another Visual Artist
 License: MIT
