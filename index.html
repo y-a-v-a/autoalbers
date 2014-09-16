@@ -37,16 +37,17 @@
     <div id="meter"><div id="amount"></div></div>
     <script src="color-scheme.js"></script>
     <script>
-    'use strict';
     // polyfill
-    if (!Date.now)
+    if (!Date.now) {
         Date.now = function() { return new Date().getTime(); };
+    }
 
     (function() {
-        var vendors = ['webkit', 'moz']
-        , i = 0
-        , prefix,
-        lastTime;
+        'use strict';
+        var vendors = ['webkit', 'moz'];
+        var i = 0;
+        var prefix;
+        var lastTime;
         for (; i < vendors.length && !window.requestAnimationFrame; ++i) {
             prefix = vendors[i];
             window.requestAnimationFrame = window[prefix + 'RequestAnimationFrame'];
@@ -67,49 +68,50 @@
     var handle;
 
     (function() {
-        var interval
-        , duration = 8
-        , canvas = document.getElementById('autoalbers')
-        , context = canvas.getContext('2d')
+        'use strict';
+        var interval;
+        var duration = 8;
+        var canvas = document.getElementById('autoalbers');
+        var context = canvas.getContext('2d');
 
-        , createAlbers = function createAlbers() {
-            var keyCache = []
-            , colors = []
-            , getKey = function getKey() {
+        var createAlbers = function createAlbers() {
+            var keyCache = [];
+            var colors = [];
+            var getKey = function getKey() {
                 var key = getRandomKey(colors.length);
                 while (keyCache.indexOf(key) !== -1) {
                     key = getRandomKey(colors.length);
                 }
                 keyCache.push(key);
                 return key;
-            }
-            , i = 0;
+            };
+            var i = 0;
 
             colors = generateScheme();
             
             for(;i < 4; i += 1) {
                 (function(i) {
-                    var key = getKey()
-                    , x = i * 60
-                    , y = i * 90
-                    , width = (600) - (i * 120)
-                    , height = (600) - (i * 120);
+                    var key = getKey();
+                    var x = i * 60;
+                    var y = i * 90;
+                    var width = (600) - (i * 120);
+                    var height = (600) - (i * 120);
 
                     context.fillStyle = '#' + colors[key];
                     context.fillRect(x, y, width, height);
                 }(i));
             }
-        }
+        };
         
-        , generateScheme = function generateScheme() {
-            var colorScheme = new ColorScheme()
-            , hue = Math.floor(Math.random() * 360)
-            , schemes = ['mono', 'contrast', 'triade', 'tetrade', 'analogic']
-            , variations = ['pastel', 'soft', 'light', 'hard', 'pale']
-            , variation = variations[getRandomKey(variations.length)]
-            , scheme = schemes[getRandomKey(schemes.length)]
-            , distance
-            , complement;
+        var generateScheme = function generateScheme() {
+            var colorScheme = new ColorScheme();
+            var hue = Math.floor(Math.random() * 360);
+            var schemes = ['mono', 'contrast', 'triade', 'tetrade', 'analogic'];
+            var variations = ['pastel', 'soft', 'light', 'hard', 'pale'];
+            var variation = variations[getRandomKey(variations.length)];
+            var scheme = schemes[getRandomKey(schemes.length)];
+            var distance;
+            var complement;
             
             colorScheme.from_hue(hue).scheme(scheme).variation(variation);
             if (scheme === 'analogic') {
@@ -124,24 +126,26 @@
             window.console && console.log && console.log(hue, scheme, variation, complement, distance);
 
             return colorScheme.colors();
-        }
+        };
         
-        , getRandomKey = function getRandomKey(max) {
+        var getRandomKey = function getRandomKey(max) {
             return Math.floor(Math.random() * max);
-        }
+        };
 
-        , amount = document.getElementById('amount')
-        , width = 0
-        , step = (document.documentElement.clientWidth / duration)
-        , past = 0
-        , draw = function(time) {
-            var delta = (time || 0) - past
-            , jump = (delta === 0) ? 0 : (step * (delta / 1000));
+        var amount = document.getElementById('amount');
+        var width = 0;
+        var step = (document.documentElement.clientWidth / duration);
+        var past = 0;
+        var draw = function(time) {
+            var delta = (time || 0) - past;
+            var jump = (delta === 0) ? 0 : (step * (delta / 1000));
+
             handle = requestAnimationFrame(draw);
             amount.style.width = (width += jump) + 'px';
             past = time || 0;
-        }
-        , timer = function timer() {
+        };
+
+        var timer = function timer() {
             cancelAnimationFrame(handle);
             width = 0;
             createAlbers();
