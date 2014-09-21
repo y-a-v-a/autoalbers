@@ -17,11 +17,6 @@ Some [http://www.huffingtonpost.com/james-elkins/how-long-does-it-take-to-_b_779
 * [http://en.wikipedia.org/wiki/Josef_Albers](Josef Albers) was a German-born American artist and educator whose work, both in Europe and in the United States, formed the basis of some of the most influential and far-reaching art education programs of the twentieth century.
 * [http://amzn.com/0300115954](Interaction of Color: Revised and Expanded Edition) a book, you know, a stack of paper glued together serving information.
 
-#### TODO
-
-* add favicon
-* add robots.txt
-
 
 (c) 2014 - Yet Another Visual Artist
 License: MIT
