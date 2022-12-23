@@ -67,6 +67,7 @@
       let intervalId;
       let barWidth = 0;
       let lastTime = 0;
+      const duration = 12;
 
       function getRandomKey(max) {
         return Math.floor(Math.random() * max);
@@ -137,7 +138,6 @@
       }
 
       function homage() {
-        const duration = 17;
         const amount = document.getElementById('amount');
         const step = document.documentElement.clientWidth / duration;
 
