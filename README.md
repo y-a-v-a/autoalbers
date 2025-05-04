@@ -41,7 +41,23 @@ const colors = scheme
   .getColors();            // Generate and return hex colors
 ```
 
-Additional features:
+### Color Schemes
+
+Traditional schemes:
+- `mono` / `monochromatic` - Single hue with variations
+- `contrast` - Two complementary colors (180° apart)  
+- `triade` - Three colors evenly spaced (120° apart)
+- `tetrade` - Four colors in rectangle pattern
+- `analogic` - Three adjacent colors on the wheel
+
+New schemes:
+- `splitComplement` - Base color plus two colors adjacent to its complement
+- `square` - Four colors evenly spaced (90° apart) around the color wheel
+- `phi` - Colors spaced using the golden angle (137.5°) for natural harmony
+- `shades` - Progressively darker versions of the base color
+- `tints` - Progressively lighter versions of the base color
+
+### Additional Features
 - Generate between 2-16 base colors
 - Adjust saturation with `saturate()` and `desaturate()` methods
 - Group colors with `getColorSet()` for organized access

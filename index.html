@@ -75,8 +75,11 @@
       }
 
       const colorScheme = new ColorScheme();
-      const schemes = ['mono', 'contrast', 'triade', 'tetrade', 'analogic'];
-      const variations = ['pastel', 'soft', 'light', 'hard', 'pale'];
+      const schemes = [
+        'mono', 'contrast', 'triade', 'tetrade', 'analogic', 
+        'splitComplement', 'square', 'phi', 'shades', 'tints'
+      ];
+      const variations = ['pastel', 'soft', 'light', 'hard', 'pale', 'vibrant', 'muted'];
 
       function generateScheme() {
         const hue = Math.floor(Math.random() * 360);

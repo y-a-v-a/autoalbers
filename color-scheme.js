@@ -12,7 +12,12 @@ const SCHEMES = {
   contrast: true,
   triade: true,
   tetrade: true,
-  analogic: true
+  analogic: true,
+  splitComplement: true,
+  square: true,
+  phi: true,  // Golden ratio based scheme
+  shades: true,
+  tints: true
 };
 
 // Predefined presets for color variations
@@ -350,6 +355,90 @@ export class ColorScheme {
         if (usedColors >= 4 && this._add_complement) {
           this.colors[3].set_hue(h);
           this.colors[3].rotate(180);
+        }
+      },
+      
+      splitComplement: () => {
+        // Split complementary: base color plus two colors adjacent to its complement
+        usedColors = Math.min(3, this.colorCount);
+        const dif = 30 * this._distance;
+        
+        if (usedColors >= 2) {
+          this.colors[1].set_hue(h);
+          this.colors[1].rotate(180 - dif);
+        }
+        
+        if (usedColors >= 3) {
+          this.colors[2].set_hue(h);
+          this.colors[2].rotate(180 + dif);
+        }
+      },
+      
+      square: () => {
+        // Square: four colors evenly spaced around the color wheel (90° apart)
+        usedColors = Math.min(4, this.colorCount);
+        
+        if (usedColors >= 2) {
+          this.colors[1].set_hue(h);
+          this.colors[1].rotate(90);
+        }
+        
+        if (usedColors >= 3) {
+          this.colors[2].set_hue(h);
+          this.colors[2].rotate(180);
+        }
+        
+        if (usedColors >= 4) {
+          this.colors[3].set_hue(h);
+          this.colors[3].rotate(270);
+        }
+      },
+      
+      phi: () => {
+        // Golden ratio (phi) scheme: colors spaced by the golden angle (137.5°)
+        // This creates a naturally harmonious distribution
+        const goldenAngle = 137.5;
+        usedColors = Math.min(this.colorCount, 5);  // Up to 5 golden ratio colors
+        
+        for (let i = 1; i < usedColors; i++) {
+          this.colors[i].set_hue(h);
+          this.colors[i].rotate(goldenAngle * i);
+        }
+      },
+      
+      shades: () => {
+        // Shades: Progressively darker versions of the base color
+        // We'll use a single hue with decreasing brightness
+        usedColors = Math.min(this.colorCount, 5);
+        
+        // Create a custom preset for darker shades
+        const shadePreset = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2];
+        
+        for (let i = 0; i < usedColors; i++) {
+          this.colors[i].set_hue(h);
+          // Set custom saturation and value parameters
+          for (let j = 0; j <= 3; j++) {
+            const valueAdjustment = 1 - (i * 0.15);  // Decrease value for darker shades
+            this.colors[i].set_variant(j, 0.9, shadePreset[j] * valueAdjustment);
+          }
+        }
+      },
+      
+      tints: () => {
+        // Tints: Progressively lighter versions of the base color
+        // We'll use a single hue with increasing brightness and lower saturation
+        usedColors = Math.min(this.colorCount, 5);
+        
+        // Create a custom preset for lighter tints
+        const tintPreset = [0.3, 0.95, 0.5, 0.9, 0.7, 0.85, 0.9, 0.8];
+        
+        for (let i = 0; i < usedColors; i++) {
+          this.colors[i].set_hue(h);
+          // Set custom saturation and value parameters
+          for (let j = 0; j <= 3; j++) {
+            const satAdjustment = 0.9 - (i * 0.15);  // Decrease saturation for lighter tints
+            this.colors[i].set_variant(j, tintPreset[j] * satAdjustment, tintPreset[j + 1]);
+          }
         }
       }
     };

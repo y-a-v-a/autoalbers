@@ -112,6 +112,61 @@ function runTests() {
     analogicComplement.fromHue(baseHue).setScheme('analogic').addComplement(true);
     const analogicComplementColors = analogicComplement.getColorSet();
     assert(analogicComplementColors.length === 4, 'Analogic with complement should have 4 colors');
+    
+    // Test split complementary scheme
+    const splitComplement = new ColorScheme();
+    splitComplement.fromHue(baseHue).setScheme('splitComplement');
+    const splitComplementColors = splitComplement.getColorSet();
+    assert(splitComplementColors.length === 3, 'Split complementary scheme should have 3 colors');
+    
+    // Test square scheme
+    const square = new ColorScheme();
+    square.fromHue(baseHue).setScheme('square');
+    const squareColors = square.getColorSet();
+    assert(squareColors.length === 4, 'Square scheme should have 4 colors');
+    
+    // Test phi (golden ratio) scheme
+    const phi = new ColorScheme();
+    phi.fromHue(baseHue).setScheme('phi');
+    const phiColors = phi.getColorSet();
+    assert(phiColors.length === 4, 'Phi scheme with default color count should have 4 colors');
+    
+    // Test phi with more colors
+    const phiMore = new ColorScheme({ colorCount: 5 });
+    phiMore.fromHue(baseHue).setScheme('phi');
+    const phiMoreColors = phiMore.getColorSet();
+    assert(phiMoreColors.length === 5, 'Phi scheme with 5 colors should have 5 colors');
+    
+    // Test shades scheme
+    const shades = new ColorScheme();
+    shades.fromHue(baseHue).setScheme('shades');
+    const shadesColors = shades.getColorSet();
+    assert(shadesColors.length === 4, 'Shades scheme should have 4 color sets by default');
+    
+    // Test that shades get progressively darker
+    const shadesHex = shades.getColors();
+    // Extract value components from first variation of each color
+    const shadesValues = [];
+    for (let i = 0; i < shadesHex.length; i += 4) {
+      const r = parseInt(shadesHex[i].substr(0, 2), 16);
+      const g = parseInt(shadesHex[i].substr(2, 2), 16);
+      const b = parseInt(shadesHex[i].substr(4, 2), 16);
+      shadesValues.push(Math.max(r, g, b));
+    }
+    // Check that each shade is darker than the previous
+    let shadesGetDarker = true;
+    for (let i = 1; i < shadesValues.length; i++) {
+      if (shadesValues[i] > shadesValues[i-1]) {
+        shadesGetDarker = false;
+      }
+    }
+    assert(shadesGetDarker, 'Shades should get progressively darker');
+    
+    // Test tints scheme
+    const tints = new ColorScheme();
+    tints.fromHue(baseHue).setScheme('tints');
+    const tintsColors = tints.getColorSet();
+    assert(tintsColors.length === 4, 'Tints scheme should have 4 color sets by default');
   }
   
   // Test saturation adjustment
