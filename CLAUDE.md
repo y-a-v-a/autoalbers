@@ -24,4 +24,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Structure
 - Main application logic in index.html
 - Color scheme utilities in color-scheme.js
+  - Supports various color schemes: mono, contrast, triade, tetrade, analogic, splitComplement, square, phi, shades, tints
+  - Variation presets: default, pastel, soft, light, hard, pale, vibrant, muted
+  - Can adjust saturation, use web-safe colors, and set color distances
+- API documentation in docs/color-scheme-api.md
 - New images should match existing naming conventions
+
+## Documentation
+- API documentation for color-scheme.js is available in docs/color-scheme-api.md
+- When updating functionality, ensure documentation is updated to match
+- Documentation should follow Markdown format with proper headings and code examples
