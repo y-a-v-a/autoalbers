@@ -17,7 +17,11 @@ const SCHEMES = {
   square: true,
   phi: true,  // Golden ratio based scheme
   shades: true,
-  tints: true
+  tints: true,
+  chaos: true,  // Adds random variations
+  seasons: true, // Seasonal color transitions
+  gradient: true, // Linear gradient between two colors
+  perlin: true   // Perlin noise based color scheme
 };
 
 // Predefined presets for color variations
@@ -95,6 +99,57 @@ const clone = (obj) => {
 };
 
 /**
+ * Simple hash function for deterministic randomness
+ * @param {string} str - String to hash
+ * @returns {number} - Hash value
+ */
+const simpleHash = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+};
+
+/**
+ * Simple Perlin noise-like function
+ * @param {number} x - X coordinate
+ * @param {number} y - Y coordinate
+ * @param {number} seed - Random seed
+ * @returns {number} - Noise value between 0 and 1
+ */
+const simpleNoise = (x, y, seed = 0) => {
+  // Simple octave noise approximation
+  const rand = (x, y, s) => {
+    return (Math.sin(x * 12.9898 + y * 78.233 + s) * 43758.5453) % 1;
+  };
+  
+  // Grid coordinates
+  const x0 = Math.floor(x);
+  const y0 = Math.floor(y);
+  const x1 = x0 + 1;
+  const y1 = y0 + 1;
+  
+  // Interpolation weights
+  const sx = x - x0;
+  const sy = y - y0;
+  
+  // Sample grid points
+  const n00 = rand(x0, y0, seed);
+  const n01 = rand(x0, y1, seed);
+  const n10 = rand(x1, y0, seed);
+  const n11 = rand(x1, y1, seed);
+  
+  // Interpolate
+  const ix0 = n00 * (1 - sx) + n10 * sx;
+  const ix1 = n01 * (1 - sx) + n11 * sx;
+  
+  return ix0 * (1 - sy) + ix1 * sy;
+};
+
+/**
  * MutableColor class for handling color transformations
  */
 class MutableColor {
@@ -104,7 +159,8 @@ class MutableColor {
    */
   constructor(hue) {
     if (hue == null) {
-      throw new Error("No hue specified");
+      // Default to a random hue if none is provided
+      hue = Math.floor(Math.random() * 360);
     }
     
     this.hue = 0;
@@ -142,8 +198,31 @@ class MutableColor {
     const derivative1 = this.hue - Math.floor(d);
     const derivative2 = (derivative1 + 15) % 360;
     
-    const colorset1 = COLOR_WHEEL[derivative1];
-    const colorset2 = COLOR_WHEEL[derivative2];
+    // Ensure derivatives are valid keys in the COLOR_WHEEL
+    // Map to nearest valid key if not found
+    const findNearestKey = (key) => {
+      if (COLOR_WHEEL[key]) return key;
+      
+      const keys = Object.keys(COLOR_WHEEL).map(Number).sort((a, b) => a - b);
+      let nearestKey = keys[0];
+      let minDiff = Math.abs(key - nearestKey);
+      
+      for (const validKey of keys) {
+        const diff = Math.abs(key - validKey);
+        if (diff < minDiff) {
+          minDiff = diff;
+          nearestKey = validKey;
+        }
+      }
+      
+      return nearestKey;
+    };
+    
+    const safeKey1 = findNearestKey(derivative1);
+    const safeKey2 = findNearestKey(derivative2);
+    
+    const colorset1 = COLOR_WHEEL[safeKey1];
+    const colorset2 = COLOR_WHEEL[safeKey2];
     
     const en = { red: 0, green: 1, blue: 2, value: 3 };
     
@@ -272,6 +351,7 @@ export class ColorScheme {
     this._web_safe = false;
     this._add_complement = false;
     this._saturation_adjustment = 0; // -1 to 1, where -1 is completely desaturated
+    this._seedValue = Date.now(); // Random seed for noise-based schemes
   }
 
   /**
@@ -440,6 +520,148 @@ export class ColorScheme {
             this.colors[i].set_variant(j, tintPreset[j] * satAdjustment, tintPreset[j + 1]);
           }
         }
+      },
+      
+      // NEW SCHEMES
+      
+      chaos: () => {
+        // Chaos: Semi-random colors with some relationship
+        // Uses deterministic randomness based on seed value
+        usedColors = this.colorCount;
+        const seed = this._seedValue;
+        
+        // Use the base hue to anchor the randomness
+        const baseHue = h;
+        
+        for (let i = 0; i < usedColors; i++) {
+          // Create controlled chaos with some relationship to the base color
+          const hashValue = simpleHash(`${seed}-${i}-${baseHue}`);
+          const randomOffset = (hashValue % 240) - 120; // -120 to +120 degrees
+          
+          // Keep some relationship to the original color
+          this.colors[i].set_hue((baseHue + randomOffset) % 360);
+          
+          // Also vary saturation and value for each color
+          const randomSatFactor = 0.5 + (hashValue % 100) / 200; // 0.5 to 1.0
+          const randomValFactor = 0.5 + (hashValue % 150) / 300; // 0.5 to 1.0
+          
+          for (let j = 0; j <= 3; j++) {
+            const baseSat = this.colors[i].get_saturation(j);
+            const baseVal = this.colors[i].get_value(j);
+            this.colors[i].set_variant(j, baseSat * randomSatFactor, baseVal * randomValFactor);
+          }
+        }
+      },
+      
+      seasons: () => {
+        // Seasons: Colors inspired by seasonal transitions
+        // Spring (green/pink), Summer (yellow/blue), Fall (orange/brown), Winter (blue/white)
+        usedColors = Math.min(this.colorCount, 4);
+        
+        const seasonHues = [
+          90,  // Spring - green
+          60,  // Summer - yellow/gold
+          30,  // Fall - orange/brown
+          210  // Winter - cool blue
+        ];
+        
+        const seasonSaturation = [
+          [0.7, 0.9, 0.6, 0.8],  // Spring - medium-high saturation
+          [0.8, 0.9, 0.7, 0.8],  // Summer - high saturation
+          [0.9, 0.7, 0.8, 0.6],  // Fall - varying saturation
+          [0.4, 0.3, 0.5, 0.2]   // Winter - low saturation
+        ];
+        
+        const seasonValue = [
+          [0.9, 0.7, 0.8, 0.9],  // Spring - bright
+          [0.9, 0.8, 1.0, 0.7],  // Summer - very bright
+          [0.7, 0.6, 0.5, 0.8],  // Fall - medium brightness
+          [0.9, 1.0, 0.8, 0.9]   // Winter - bright (for snow effect)
+        ];
+        
+        // Base hue affects the seasonal colors
+        const hueShift = Math.floor(h / 30) * 10; // Use base hue to shift the seasonal palette
+        
+        for (let i = 0; i < usedColors; i++) {
+          // Set the base seasonal hue with some influence from the base color
+          this.colors[i].set_hue((seasonHues[i] + hueShift) % 360);
+          
+          // Set seasonal saturation and value
+          for (let j = 0; j <= 3; j++) {
+            this.colors[i].set_variant(j, seasonSaturation[i][j], seasonValue[i][j]);
+          }
+        }
+      },
+      
+      gradient: () => {
+        // Gradient: Linear transition between two colors
+        usedColors = this.colorCount;
+        
+        // Start with the base hue
+        const startHue = h;
+        // End with a color that's different but not opposite
+        const endHue = (h + 90 + (h % 90)) % 360;
+        
+        for (let i = 0; i < usedColors; i++) {
+          // Calculate interpolation factor
+          const factor = usedColors > 1 ? i / (usedColors - 1) : 0;
+          
+          // Linear interpolation between start and end hues
+          // Using the shorter path around the color wheel
+          let hueDistance = endHue - startHue;
+          if (Math.abs(hueDistance) > 180) {
+            hueDistance = hueDistance > 0 ? hueDistance - 360 : hueDistance + 360;
+          }
+          
+          const newHue = (startHue + hueDistance * factor + 360) % 360;
+          this.colors[i].set_hue(newHue);
+          
+          // Also interpolate saturation and value
+          const startSat = 0.7;
+          const endSat = 0.9;
+          const startVal = 0.8;
+          const endVal = 0.6;
+          
+          for (let j = 0; j <= 3; j++) {
+            const interpolatedSat = startSat + (endSat - startSat) * factor;
+            const interpolatedVal = startVal + (endVal - startVal) * factor;
+            this.colors[i].set_variant(j, interpolatedSat, interpolatedVal);
+          }
+        }
+      },
+      
+      perlin: () => {
+        // Perlin: Colors based on perlin-like noise
+        // Creates an organic, flowing pattern of colors
+        usedColors = this.colorCount;
+        const seed = this._seedValue;
+        
+        // Base the noise pattern around the starting hue
+        const baseHue = h;
+        
+        for (let i = 0; i < usedColors; i++) {
+          // Use noise function to generate organic variations
+          // Map i to x,y coordinates on a circle for more interesting patterns
+          const angle = (i / usedColors) * Math.PI * 2;
+          const x = Math.cos(angle);
+          const y = Math.sin(angle);
+          
+          // Generate noise values for hue, saturation, and value
+          const noiseHue = simpleNoise(x, y, seed);
+          const noiseSat = simpleNoise(x + 100, y + 100, seed);
+          const noiseVal = simpleNoise(x + 200, y + 200, seed);
+          
+          // Map noise to hue variations (limit range to avoid chaotic colors)
+          const hueOffset = noiseHue * 120 - 60; // -60 to +60 degrees
+          this.colors[i].set_hue((baseHue + hueOffset + 360) % 360);
+          
+          // Set saturation and value based on noise
+          for (let j = 0; j <= 3; j++) {
+            const saturation = 0.5 + noiseSat * 0.5; // 0.5 to 1.0
+            const value = 0.6 + noiseVal * 0.4; // 0.6 to 1.0
+            this.colors[i].set_variant(j, saturation, value);
+          }
+        }
       }
     };
     
@@ -499,7 +721,8 @@ export class ColorScheme {
    */
   fromHue(h) {
     if (h == null) {
-      throw new Error("fromHue needs an argument");
+      // Default to a random hue if none is provided
+      h = Math.floor(Math.random() * 360);
     }
     
     this.colors[0].set_hue(h);
@@ -688,6 +911,16 @@ export class ColorScheme {
     }
     
     this._set_variant_preset(PRESETS[v]);
+    return this;
+  }
+  
+  /**
+   * Set random seed value for noise-based schemes
+   * @param {number} seed - Seed value
+   * @returns {ColorScheme} - This instance for chaining
+   */
+  setSeed(seed) {
+    this._seedValue = seed;
     return this;
   }
 

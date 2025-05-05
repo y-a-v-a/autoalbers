@@ -30,6 +30,28 @@ Creates a deep clone of an object.
 **Returns:**
 - `*`: A deep clone of the input object
 
+### simpleHash(str)
+
+A simple hash function for deterministic randomness.
+
+**Parameters:**
+- `str` (string): String to hash
+
+**Returns:**
+- `number`: Hash value
+
+### simpleNoise(x, y, seed)
+
+A simple Perlin noise-like function.
+
+**Parameters:**
+- `x` (number): X coordinate
+- `y` (number): Y coordinate
+- `seed` (number, optional): Random seed. Defaults to 0.
+
+**Returns:**
+- `number`: Noise value between 0 and 1
+
 ## MutableColor Class
 
 The `MutableColor` class handles color transformations and is used internally by the `ColorScheme` class.
@@ -229,6 +251,10 @@ Sets the color scheme to use.
   - `phi`: Golden ratio (phi) scheme (colors spaced by the golden angle 137.5°)
   - `shades`: Progressively darker versions of the base color
   - `tints`: Progressively lighter versions of the base color
+  - `chaos`: Semi-random colors with some relationship to the base color
+  - `seasons`: Colors inspired by seasonal transitions (spring, summer, fall, winter)
+  - `gradient`: Linear transition between two colors
+  - `perlin`: Colors based on Perlin-like noise for organic, flowing patterns
 
 **Returns:**
 - `ColorScheme`: This instance for chaining
@@ -256,6 +282,16 @@ Sets the color variation preset.
 
 **Throws:**
 - Error if no argument is provided or if variation name is invalid
+
+### setSeed(seed)
+
+Sets the random seed value for noise-based schemes.
+
+**Parameters:**
+- `seed` (number): Seed value
+
+**Returns:**
+- `ColorScheme`: This instance for chaining
 
 ### adjustSaturation(amount)
 
@@ -320,4 +356,20 @@ const colors = scheme.getColors();
 // Get color sets (grouped by variations)
 const colorSets = scheme.getColorSet();
 // Returns an array of arrays, each inner array containing 4 variations of a color
+
+// Using one of the new schemes
+const chaosScheme = new ColorScheme();
+chaosScheme
+  .fromHue(180)
+  .setScheme('chaos')    // Use the chaos scheme
+  .setSeed(12345)        // Set a specific seed for reproducible results
+  .setColorCount(5);     // Generate 5 colors
+
+// Using Perlin noise scheme
+const perlinScheme = new ColorScheme();
+perlinScheme
+  .fromHex('FF5500')     // Start with orange
+  .setScheme('perlin')   // Use the Perlin noise scheme
+  .setSeed(42)           // Set a specific seed
+  .setColorCount(6);     // Generate 6 colors
 ```

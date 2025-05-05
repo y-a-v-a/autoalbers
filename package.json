@@ -1,0 +1,23 @@
+{
+  "name": "autoalbers",
+  "version": "2.0.0",
+  "description": "Automated homage to the square from Josef Albers",
+  "homepage": "https://github.com/y-a-v-a/autoalbers#readme",
+  "bugs": {
+    "url": "https://github.com/y-a-v-a/autoalbers/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/y-a-v-a/autoalbers.git"
+  },
+  "license": "MIT",
+  "author": "Vincent Bruijn <vebruijn@gmail.com>",
+  "type": "module",
+  "main": "index.html",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "node color-scheme.test.js"
+  }
+}
