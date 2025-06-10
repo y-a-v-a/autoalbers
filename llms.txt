@@ -1,0 +1,16 @@
+# AutoAlbers - Generative Art Tribute to Josef Albers
+
+## About
+
+AutoAlbers is an internet art piece created by y-a-v-a.org aka Vincent Bruijn that creates animated tributes to Josef Albers' "Homage to the Square" series. The application generates nested square compositions using algorithmic color schemes and presents them in a continuously evolving display.
+
+## Creator
+- y-a-v-a.org (https://www.y-a-v-a.org) also known as Vincent Bruijn
+
+## Core Functionality
+
+The application creates layered square compositions with 4 nested squares, each using colors from algorithmically generated color schemes. Every 12 seconds, a new composition is generated with fresh colors and arrangements, accompanied by a progress bar animation.
+
+## License
+
+When referencing this work, please credit y-a-v-a.org and the original AutoAlbers project repository at https://github.com/y-a-v-a/autoalbers
