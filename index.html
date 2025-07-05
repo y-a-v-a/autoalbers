@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>AutoAlbers • y-a-v-a.org</title>
+    <title>y-a-v-a.org • AutoAlbers • 2014</title>
     <meta
       name="description"
       content="Homage to 'Homage to the Square' of Josef Albers by y-a-v-a.org"
@@ -18,9 +18,21 @@
     <meta name="repository" content="https://github.com/y-a-v-a/autoalbers" />
     <link rel="shortcut icon" href="favicon.ico" />
     <link rel="apple-touch-icon" sizes="76x76" href="touch-icon-76x76@1x.png" />
-    <link rel="apple-touch-icon" sizes="120x120" href="touch-icon-120x120@2x.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="touch-icon-152x152@2x.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="touch-icon-180x180@3x.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="touch-icon-120x120@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="touch-icon-152x152@2x.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="touch-icon-180x180@3x.png"
+    />
     <style>
       html,
       body {
@@ -120,7 +132,16 @@
         'gradient',
         'perlin',
       ];
-      const variations = ['pastel', 'soft', 'light', 'hard', 'pale', 'vibrant', 'muted'];
+
+      const variations = [
+        'pastel',
+        'soft',
+        'light',
+        'hard',
+        'pale',
+        'vibrant',
+        'muted',
+      ];
 
       // Current color scheme parameters
       let currentParams = {
@@ -140,8 +161,12 @@
           const urlParams = new URLSearchParams(queryString);
           params.scheme = urlParams.get('scheme');
           params.variation = urlParams.get('variation');
-          params.hue = urlParams.get('hue') ? parseInt(urlParams.get('hue')) : null;
-          params.seed = urlParams.get('seed') ? parseInt(urlParams.get('seed')) : null;
+          params.hue = urlParams.get('hue')
+            ? parseInt(urlParams.get('hue'))
+            : null;
+          params.seed = urlParams.get('seed')
+            ? parseInt(urlParams.get('seed'))
+            : null;
         }
         return params;
       }
@@ -178,7 +203,9 @@
 
         // Use URL parameter for hue if valid, otherwise random
         currentParams.hue =
-          urlParams.hue !== null ? urlParams.hue : Math.floor(Math.random() * 360);
+          urlParams.hue !== null
+            ? urlParams.hue
+            : Math.floor(Math.random() * 360);
 
         // Use URL parameter for variation if valid, otherwise random
         if (urlParams.variation && variations.includes(urlParams.variation)) {
@@ -208,7 +235,9 @@
         // Set seed for noise-based schemes (either from URL or random)
         if (['chaos', 'perlin'].includes(currentParams.scheme)) {
           currentParams.seed =
-            urlParams.seed !== null ? urlParams.seed : Math.floor(Math.random() * 10000);
+            urlParams.seed !== null
+              ? urlParams.seed
+              : Math.floor(Math.random() * 10000);
           colorScheme.setSeed(currentParams.seed);
         }
 
@@ -219,7 +248,9 @@
         }
 
         // Set distance for schemes that need it
-        if (['mono', 'contrast', 'seasons'].indexOf(currentParams.scheme) === -1) {
+        if (
+          ['mono', 'contrast', 'seasons'].indexOf(currentParams.scheme) === -1
+        ) {
           currentParams.distance = Math.random();
           colorScheme.setDistance(currentParams.distance);
         }
@@ -232,7 +263,7 @@
           currentParams.variation,
           currentParams.complement,
           currentParams.distance,
-          currentParams.seed
+          currentParams.seed,
         );
         console.log('Shareable URL:', shareableUrl);
 
